@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ferramentas365 — Ferramentas grátis online, direto no navegador</title>
+<meta name="description" content="Coleção de ferramentas gratuitas e rápidas que funcionam no seu navegador: calculadora de IMC, conversor de texto e muito mais. Sem instalar nada, sem cadastro.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0E9C82">
+<link rel="canonical" href="https://ferramentas365.com.br/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ferramentas365 — Ferramentas grátis online">
+<meta property="og:description" content="Ferramentas gratuitas e rápidas que funcionam direto no navegador. Sem instalar, sem cadastro.">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="https://ferramentas365.com.br/">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Ferramentas365",
+  "url": "https://ferramentas365.com.br/",
+  "description": "Coleção de ferramentas gratuitas e rápidas que funcionam direto no navegador.",
+  "inLanguage": "pt-BR",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://ferramentas365.com.br/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<style>
+  :root{
+    --brand:#0E9C82;
+    --brand-dark:#0B7A66;
+    --brand-soft:#E6F4F0;
+    --ink:#10221D;
+    --muted:#5C6B66;
+    --line:#E4E9E7;
+    --bg:#FBFCFB;
+    --card:#FFFFFF;
+    --shadow:0 1px 2px rgba(16,34,29,.04), 0 8px 24px rgba(16,34,29,.05);
+    --shadow-hover:0 2px 4px rgba(16,34,29,.06), 0 18px 40px rgba(16,34,29,.10);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  /* ---------- header ---------- */
+  header{position:sticky;top:0;z-index:50;background:rgba(251,252,251,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:66px}
+  .logo{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink)}
+  .logo .mark{
+    width:38px;height:38px;border-radius:11px;flex:none;
+    background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+    display:grid;place-items:center;color:#fff;font-family:"Bricolage Grotesque";font-weight:800;font-size:1.2rem;
+    box-shadow:0 4px 12px rgba(14,156,130,.35);
+  }
+  .logo b{font-family:"Bricolage Grotesque";font-weight:800;font-size:1.18rem;letter-spacing:-.02em}
+  .logo b span{color:var(--brand)}
+  nav.top{display:flex;gap:6px}
+  nav.top a{
+    text-decoration:none;color:var(--muted);font-weight:600;font-size:.92rem;
+    padding:8px 13px;border-radius:10px;transition:.15s;
+  }
+  nav.top a:hover{color:var(--ink);background:var(--brand-soft)}
+  @media(max-width:560px){nav.top{display:none}}
+
+  /* ---------- hero ---------- */
+  .hero{padding:62px 0 30px;text-align:center}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:.8rem;font-weight:700;letter-spacing:.02em;color:var(--brand-dark);
+    background:var(--brand-soft);padding:6px 13px;border-radius:999px;margin-bottom:20px;
+  }
+  .eyebrow .pulse{width:7px;height:7px;border-radius:50%;background:var(--brand);box-shadow:0 0 0 0 rgba(14,156,130,.5);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(14,156,130,.45)}70%{box-shadow:0 0 0 8px rgba(14,156,130,0)}100%{box-shadow:0 0 0 0 rgba(14,156,130,0)}}
+  h1{
+    font-family:"Bricolage Grotesque";font-weight:800;letter-spacing:-.025em;line-height:1.08;
+    font-size:clamp(1.85rem,6vw,3.3rem);margin:0 auto 16px;text-wrap:balance;
+  }
+  @media(max-width:340px){h1 br{display:none}}
+  h1 em{font-style:normal;color:var(--brand);position:relative}
+  .sub{font-size:clamp(1.02rem,2.2vw,1.18rem);color:var(--muted);max-width:54ch;margin:0 auto 30px}
+
+  /* ---------- search ---------- */
+  .search{position:relative;max-width:540px;margin:0 auto}
+  .search svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:21px;height:21px;color:var(--muted);pointer-events:none}
+  .search input{
+    width:100%;padding:17px 18px 17px 50px;font-size:1.05rem;font-family:inherit;
+    border:1.5px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);
+    box-shadow:var(--shadow);transition:.18s;
+  }
+  .search input::placeholder{color:#9AA8A3}
+  .search input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+
+  /* ---------- chips ---------- */
+  .chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin:24px auto 0;max-width:760px}
+  .chip{
+    font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;
+    padding:8px 15px;border-radius:999px;border:1.5px solid var(--line);
+    background:var(--card);color:var(--muted);transition:.15s;
+  }
+  .chip:hover{border-color:var(--brand);color:var(--brand-dark)}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+
+  /* ---------- grid ---------- */
+  .catalog{padding:40px 0 10px}
+  .count{font-size:.9rem;color:var(--muted);font-weight:600;margin:0 0 18px;padding-left:2px}
+  .count b{color:var(--ink)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media(max-width:920px){.grid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
+
+  .card{
+    position:relative;display:flex;flex-direction:column;gap:9px;aspect-ratio:1;overflow:hidden;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;text-decoration:none;color:inherit;box-shadow:var(--shadow);
+    transition:transform .18s, box-shadow .18s, border-color .18s;
+  }
+  a.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover);border-color:#D3E2DD}
+  .card .icon{
+    width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:1.35rem;flex:none;
+    background:var(--cat-soft,#EEF2F1);
+  }
+  .card h3{font-family:"Bricolage Grotesque";font-weight:700;font-size:1.05rem;letter-spacing:-.01em;margin:2px 0 0;line-height:1.2}
+  .card p{font-size:.86rem;color:var(--muted);margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .card .foot{display:flex;align-items:center;gap:8px;margin-top:auto}
+  @media(max-width:640px){.card{aspect-ratio:auto}}
+  .tag{font-size:.74rem;font-weight:700;letter-spacing:.02em;padding:4px 9px;border-radius:7px;background:var(--cat-soft,#EEF2F1);color:var(--cat,#5C6B66)}
+  .card .go{margin-left:auto;color:var(--brand);font-weight:700;font-size:.9rem;transition:transform .18s}
+  a.card:hover .go{transform:translateX(3px)}
+
+  .card.soon{cursor:default;opacity:.92}
+  .card.soon .icon{filter:grayscale(.15)}
+  .soon-badge{
+    position:absolute;top:16px;right:16px;font-size:.7rem;font-weight:700;letter-spacing:.03em;
+    color:var(--muted);background:#F0F3F2;border:1px solid var(--line);padding:3px 9px;border-radius:999px;
+  }
+
+  .empty{text-align:center;padding:50px 20px;color:var(--muted);display:none}
+  .empty.show{display:block}
+  .empty b{color:var(--ink);font-family:"Bricolage Grotesque"}
+
+  /* ---------- trust strip ---------- */
+  .trust{margin:46px 0 10px;background:var(--brand-soft);border-radius:24px;padding:34px 28px}
+  .trust .row{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+  @media(max-width:680px){.trust .row{grid-template-columns:1fr;gap:22px;text-align:center}}
+  .trust .item{display:flex;gap:13px;align-items:flex-start}
+  @media(max-width:680px){.trust .item{flex-direction:column;align-items:center;gap:8px}}
+  .trust .t-ic{width:40px;height:40px;border-radius:11px;background:#fff;display:grid;place-items:center;font-size:1.25rem;flex:none}
+  .trust h4{font-family:"Bricolage Grotesque";font-weight:700;font-size:1.02rem;margin:0 0 3px}
+  .trust p{margin:0;font-size:.9rem;color:var(--muted)}
+
+  /* ---------- about + faq ---------- */
+  .prose{padding:54px 0 10px;max-width:720px}
+  .prose h2{font-family:"Bricolage Grotesque";font-weight:800;letter-spacing:-.02em;font-size:1.7rem;margin:0 0 14px}
+  .prose p{color:#3A4944;margin:0 0 16px}
+  .faq{padding:20px 0 0;max-width:720px}
+  .faq details{border-bottom:1px solid var(--line);padding:16px 2px}
+  .faq summary{font-family:"Bricolage Grotesque";font-weight:700;font-size:1.05rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:14px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";color:var(--brand);font-size:1.4rem;line-height:1;transition:.2s}
+  .faq details[open] summary::after{transform:rotate(45deg)}
+  .faq p{color:var(--muted);margin:12px 0 2px;font-size:.96rem}
+
+  /* ---------- footer ---------- */
+  footer{margin-top:60px;border-top:1px solid var(--line);background:#fff}
+  .foot-in{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:center;padding:30px 0}
+  .foot-in .logo b{font-size:1.05rem}
+  footer nav{display:flex;flex-wrap:wrap;gap:18px}
+  footer nav a{color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:600}
+  footer nav a:hover{color:var(--brand-dark)}
+  .copy{padding:0 0 30px;color:#9AA8A3;font-size:.84rem}
+
+  @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="logo" href="/">
+      <span class="mark">F</span>
+      <b>Ferramentas<span>365</span></b>
+    </a>
+    <nav class="top">
+      <a href="#ferramentas">Ferramentas</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#faq">Dúvidas</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <span class="eyebrow"><span class="pulse"></span> Grátis · sem cadastro · no navegador</span>
+    <h1>Ferramentas que <br>resolvem <em>em segundos</em></h1>
+    <p class="sub">Uma coleção de ferramentas simples e rápidas para o dia a dia. Tudo abre direto no navegador — nada para instalar, nada para pagar.</p>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="Buscar ferramenta… (ex.: IMC, texto, senha)" autocomplete="off" aria-label="Buscar ferramenta">
+    </div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="catalog wrap" id="ferramentas">
+    <p class="count" id="count"></p>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty">
+      <p>Nenhuma ferramenta encontrada para <b id="emptyTerm"></b>.</p>
+      <p>Essa pode ser a próxima a entrar — me manda a sugestão!</p>
+    </div>
+
+    <div class="trust">
+      <div class="row">
+        <div class="item"><div class="t-ic">🆓</div><div><h4>Sempre grátis</h4><p>Sem assinatura, sem login, sem limite de uso.</p></div></div>
+        <div class="item"><div class="t-ic">🔒</div><div><h4>Roda no seu navegador</h4><p>Os dados que você digita não são enviados para servidor nenhum.</p></div></div>
+        <div class="item"><div class="t-ic">⚡</div><div><h4>Rápido e leve</h4><p>Abre na hora, funciona bem no celular e no computador.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="prose wrap" id="sobre">
+    <h2>Um lugar só para as ferramentas do dia a dia</h2>
+    <p>O Ferramentas365 reúne pequenas ferramentas que você usa de vez em quando e nunca lembra onde estavam: calcular um índice, converter um texto, gerar algo rápido. Em vez de procurar um site diferente para cada coisa, ficam todas aqui, com a mesma cara e o mesmo jeito de usar.</p>
+    <p>Cada ferramenta faz uma coisa e faz bem. Nada de telas cheias de propaganda ou cadastro antes de usar: você abre, resolve e segue a vida. A lista cresce toda semana — salve nos favoritos para acompanhar.</p>
+  </section>
+
+  <section class="faq wrap" id="faq">
+    <h2 style="font-family:'Bricolage Grotesque';font-weight:800;letter-spacing:-.02em;font-size:1.7rem;margin:0 0 6px">Perguntas frequentes</h2>
+    <details><summary>As ferramentas são mesmo gratuitas?</summary><p>Sim. Todas as ferramentas do site são gratuitas e não exigem cadastro nem instalação. É só abrir e usar.</p></details>
+    <details><summary>Preciso instalar alguma coisa?</summary><p>Não. Tudo funciona dentro do navegador, no celular ou no computador. Se quiser acesso rápido, é só salvar a página nos favoritos.</p></details>
+    <details><summary>O que vocês fazem com o que eu digito?</summary><p>Nada. A maioria das ferramentas processa tudo no próprio navegador, então o texto, peso ou dado que você insere não sai do seu aparelho.</p></details>
+    <details><summary>Posso sugerir uma ferramenta nova?</summary><p>Pode e deve. A lista é montada a partir do que as pessoas mais procuram, então sugestões ajudam a definir o que vem em seguida.</p></details>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <a class="logo" href="/"><span class="mark">F</span><b>Ferramentas<span>365</span></b></a>
+    <nav id="footNav"></nav>
+  </div>
+  <div class="wrap copy">© <span id="year"></span> Ferramentas365 · Ferramentas grátis online</div>
+</footer>
+
+<script>
+/* ==========================================================================
+   LISTA DE FERRAMENTAS  —  para adicionar uma nova, copie um bloco abaixo.
+   status: "live" (no ar, vira link) ou "soon" (em breve, não clicável)
+   ========================================================================== */
+const CATEGORIES = {
+  saude:      { label:"Saúde",       color:"#0E9C82", soft:"#E6F4F0" },
+  texto:      { label:"Texto",       color:"#7C5CFF", soft:"#EEEAFF" },
+  calculo:    { label:"Cálculo",     color:"#E08A00", soft:"#FCF1DC" },
+  conversor:  { label:"Conversores", color:"#2D7FF0", soft:"#E5F0FE" },
+  datas:      { label:"Datas",       color:"#D6457A", soft:"#FCE7EF" },
+  geradores:  { label:"Geradores",   color:"#16A34A", soft:"#E6F6EC" }
+};
+
+const TOOLS = [
+  { name:"Calculadora de IMC",   url:"/imc",              cat:"saude",     icon:"⚖️", status:"live",
+    desc:"Descubra seu Índice de Massa Corporal e veja se o peso está na faixa saudável." },
+  { name:"Conversor de texto",   url:"/conversordetexto", cat:"texto",     icon:"🔤", status:"live",
+    desc:"MAIÚSCULAS, minúsculas, Início Maiúsculo, remover acentos e mais, num clique." },
+
+  { name:"Contador de palavras", url:"#", cat:"texto",     icon:"🔢", status:"soon",
+    desc:"Conte palavras, caracteres, linhas e parágrafos de qualquer texto." },
+  { name:"Gerador de senha",     url:"#", cat:"geradores", icon:"🔑", status:"soon",
+    desc:"Crie senhas fortes e aleatórias do tamanho que você precisar." },
+  { name:"Calculadora de porcentagem", url:"#", cat:"calculo", icon:"％", status:"soon",
+    desc:"Quanto é X% de um valor, aumento, desconto e quanto um número representa." },
+  { name:"Conversor de unidades", url:"#", cat:"conversor", icon:"📐", status:"soon",
+    desc:"Metros, quilos, litros, temperatura e outras medidas, lado a lado." },
+  { name:"Calculadora de idade", url:"#", cat:"datas",     icon:"🎂", status:"soon",
+    desc:"Sua idade exata em anos, meses e dias a partir da data de nascimento." },
+  { name:"Dias entre datas",     url:"#", cat:"datas",     icon:"📅", status:"soon",
+    desc:"Quantos dias, semanas ou meses separam duas datas." },
+  { name:"Gerador de QR Code",   url:"#", cat:"geradores", icon:"🔳", status:"soon",
+    desc:"Transforme um link ou texto em QR Code para baixar e compartilhar." },
+  { name:"Calculadora de calorias", url:"#", cat:"saude",  icon:"🍎", status:"soon",
+    desc:"Estime quantas calorias seu corpo gasta por dia (TMB e gasto total)." }
+];
+
+/* ----- render ----- */
+const grid = document.getElementById('grid');
+const chipsEl = document.getElementById('chips');
+const countEl = document.getElementById('count');
+const emptyEl = document.getElementById('empty');
+const emptyTerm = document.getElementById('emptyTerm');
+const qInput = document.getElementById('q');
+let activeCat = 'all';
+
+function cardHTML(t){
+  const c = CATEGORIES[t.cat] || {label:t.cat,color:"#5C6B66",soft:"#EEF2F1"};
+  const style = `--cat:${c.color};--cat-soft:${c.soft}`;
+  const inner = `
+    <div class="icon" style="${style}">${t.icon}</div>
+    ${t.status==='soon' ? '<span class="soon-badge">Em breve</span>' : ''}
+    <h3>${t.name}</h3>
+    <p>${t.desc}</p>
+    <div class="foot">
+      <span class="tag" style="${style}">${c.label}</span>
+      ${t.status==='live' ? '<span class="go">Abrir →</span>' : ''}
+    </div>`;
+  return t.status==='live'
+    ? `<a class="card" href="${t.url}" style="${style}">${inner}</a>`
+    : `<div class="card soon" style="${style}">${inner}</div>`;
+}
+
+function render(){
+  const q = qInput.value.trim().toLowerCase();
+  const list = TOOLS.filter(t=>{
+    const okCat = activeCat==='all' || t.cat===activeCat;
+    const hay = (t.name+' '+t.desc+' '+(CATEGORIES[t.cat]?.label||'')).toLowerCase();
+    const okQ = !q || hay.includes(q);
+    return okCat && okQ;
+  });
+  grid.innerHTML = list.map(cardHTML).join('');
+  const live = TOOLS.filter(t=>t.status==='live').length;
+  countEl.innerHTML = q || activeCat!=='all'
+    ? `<b>${list.length}</b> ${list.length===1?'ferramenta':'ferramentas'}`
+    : `<b>${live}</b> no ar · mais <b>${TOOLS.length-live}</b> a caminho`;
+  if(list.length===0){ emptyEl.classList.add('show'); emptyTerm.textContent = q || CATEGORIES[activeCat]?.label || ''; }
+  else emptyEl.classList.remove('show');
+}
+
+/* chips */
+function buildChips(){
+  const used = [...new Set(TOOLS.map(t=>t.cat))];
+  const all = [['all','Todas'], ...used.map(k=>[k, CATEGORIES[k]?.label||k])];
+  chipsEl.innerHTML = all.map(([k,label],i)=>
+    `<button class="chip" data-cat="${k}" aria-pressed="${i===0}">${label}</button>`).join('');
+  chipsEl.querySelectorAll('.chip').forEach(b=>{
+    b.addEventListener('click',()=>{
+      activeCat = b.dataset.cat;
+      chipsEl.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed', x===b));
+      render();
+    });
+  });
+}
+
+/* footer links = ferramentas no ar */
+document.getElementById('footNav').innerHTML =
+  TOOLS.filter(t=>t.status==='live').map(t=>`<a href="${t.url}">${t.name}</a>`).join('');
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* aceita ?q= da URL (SearchAction) */
+const urlQ = new URLSearchParams(location.search).get('q');
+if(urlQ){ qInput.value = urlQ; }
+
+qInput.addEventListener('input', render);
+buildChips();
+render();
+</script>
+</body>
+</html>
