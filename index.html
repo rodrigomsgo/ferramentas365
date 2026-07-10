@@ -136,13 +136,9 @@
     width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:1.35rem;flex:none;
     background:var(--cat-soft,#EEF2F1);
   }
-  .card h3{font-family:"Bricolage Grotesque";font-weight:700;font-size:1.05rem;letter-spacing:-.01em;margin:2px 0 0;line-height:1.2}
-  .card p{font-size:.86rem;color:var(--muted);margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-  .card .foot{display:flex;align-items:center;gap:8px;margin-top:auto}
+  .card h3{font-family:"Bricolage Grotesque";font-weight:700;font-size:1.12rem;letter-spacing:-.01em;margin:4px 0 0;line-height:1.22}
+  .card p{font-size:.9rem;color:var(--muted);margin:0;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
   @media(max-width:640px){.card{aspect-ratio:auto}}
-  .tag{font-size:.74rem;font-weight:700;letter-spacing:.02em;padding:4px 9px;border-radius:7px;background:var(--cat-soft,#EEF2F1);color:var(--cat,#5C6B66)}
-  .card .go{margin-left:auto;color:var(--brand);font-weight:700;font-size:.9rem;transition:transform .18s}
-  a.card:hover .go{transform:translateX(3px)}
 
   .card.soon{cursor:default;opacity:.92}
   .card.soon .icon{filter:grayscale(.15)}
@@ -212,7 +208,7 @@
     <p class="sub">Uma coleção de ferramentas simples e rápidas para o dia a dia. Tudo abre direto no navegador — nada para instalar, nada para pagar.</p>
     <div class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="q" type="search" placeholder="Buscar ferramenta… (ex.: IMC, texto, senha)" autocomplete="off" aria-label="Buscar ferramenta">
+      <input id="q" type="search" placeholder="Buscar ferramenta… (ex.: IMC, mapa, texto)" autocomplete="off" aria-label="Buscar ferramenta">
     </div>
     <div class="chips" id="chips"></div>
   </section>
@@ -268,7 +264,8 @@ const CATEGORIES = {
   calculo:    { label:"Cálculo",     color:"#E08A00", soft:"#FCF1DC" },
   conversor:  { label:"Conversores", color:"#2D7FF0", soft:"#E5F0FE" },
   datas:      { label:"Datas",       color:"#D6457A", soft:"#FCE7EF" },
-  geradores:  { label:"Geradores",   color:"#16A34A", soft:"#E6F6EC" }
+  geradores:  { label:"Geradores",   color:"#16A34A", soft:"#E6F6EC" },
+  mapas:      { label:"Mapas",       color:"#0F7C9E", soft:"#E2F1F7" }
 };
 
 const TOOLS = [
@@ -276,6 +273,8 @@ const TOOLS = [
     desc:"Descubra seu Índice de Massa Corporal e veja se o peso está na faixa saudável." },
   { name:"Conversor de texto",   url:"/conversordetexto", cat:"texto",     icon:"🔤", status:"live",
     desc:"MAIÚSCULAS, minúsculas, Início Maiúsculo, remover acentos e mais, num clique." },
+  { name:"Cartograma",           url:"/cartograma",       cat:"mapas",     icon:"🗺️", status:"live",
+    desc:"Pinte os estados do Brasil, marque quantidades e baixe o mapa pronto para seu relatório." },
 
   { name:"Contador de palavras", url:"#", cat:"texto",     icon:"🔢", status:"soon",
     desc:"Conte palavras, caracteres, linhas e parágrafos de qualquer texto." },
@@ -311,11 +310,7 @@ function cardHTML(t){
     <div class="icon" style="${style}">${t.icon}</div>
     ${t.status==='soon' ? '<span class="soon-badge">Em breve</span>' : ''}
     <h3>${t.name}</h3>
-    <p>${t.desc}</p>
-    <div class="foot">
-      <span class="tag" style="${style}">${c.label}</span>
-      ${t.status==='live' ? '<span class="go">Abrir →</span>' : ''}
-    </div>`;
+    <p>${t.desc}</p>`;
   return t.status==='live'
     ? `<a class="card" href="${t.url}" style="${style}">${inner}</a>`
     : `<div class="card soon" style="${style}">${inner}</div>`;
