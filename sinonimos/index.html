@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#0E9C82">
+<meta name="description" content="Jogo de sinônimos grátis: uma palavra aparece e você tenta lembrar todos os sinônimos. Sem cadastro, direto no navegador.">
+<title>Jogo de Sinônimos — Ferramentas365</title>
+<style>
+  :root {
+    --marca: #0E9C82;
+    --marca-escura: #0a7a66;
+    --marca-fraca: #e8f6f2;
+    --marca-borda: #b9e2d7;
+
+    --fundo: #f7f8f7;
+    --cartao: #ffffff;
+    --linha: #e6e7e4;
+    --linha-forte: #cfd1cc;
+
+    --txt: #1f2320;
+    --txt-2: #5c625d;
+    --txt-3: #8d938e;
+
+    --erro: #b42318;
+    --alerta: #8a5a00;
+
+    --raio: 10px;
+    --raio-g: 16px;
+    --sombra: 0 1px 2px rgba(20,30,25,.04), 0 8px 24px rgba(20,30,25,.05);
+
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --serif: Georgia, "Times New Roman", serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --marca: #34c3a5;
+      --marca-escura: #7fdcc5;
+      --marca-fraca: #12302a;
+      --marca-borda: #2c5c51;
+
+      --fundo: #101211;
+      --cartao: #191c1b;
+      --linha: #2b302e;
+      --linha-forte: #3f4643;
+
+      --txt: #eaeeec;
+      --txt-2: #9aa29e;
+      --txt-3: #6f7873;
+
+      --erro: #f08a80;
+      --alerta: #e0b055;
+      --sombra: none;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 28px 16px 40px;
+    background: var(--fundo);
+    color: var(--txt);
+    font-family: var(--sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+  }
+
+  main { width: 100%; max-width: 560px; }
+
+  /* ---------- topo ---------- */
+
+  .marca {
+    display: inline-flex; align-items: center; gap: 10px;
+    text-decoration: none; color: var(--txt); margin-bottom: 28px;
+  }
+  .marca:focus-visible { outline: 2px solid var(--marca); outline-offset: 4px; border-radius: 6px; }
+  .marca-icone {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: var(--marca); color: #fff;
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 16px;
+  }
+  .marca-nome { font-weight: 700; font-size: 16px; letter-spacing: -.2px; }
+  .marca-seta { color: var(--txt-3); font-size: 13px; margin-left: 2px; }
+  .marca:hover .marca-seta { color: var(--txt-2); }
+
+  .pilula {
+    display: inline-block; margin: 0 0 14px;
+    padding: 5px 12px; border-radius: 999px;
+    background: var(--marca-fraca); border: 1px solid var(--marca-borda);
+    color: var(--marca-escura); font-size: 12.5px; font-weight: 500;
+  }
+
+  h1 {
+    font-size: 30px; line-height: 1.2; letter-spacing: -.7px;
+    font-weight: 700; margin: 0 0 8px;
+  }
+  h1 em { font-style: italic; color: var(--marca); }
+
+  .subtitulo { color: var(--txt-2); font-size: 15px; margin: 0 0 28px; }
+
+  /* ---------- cartão ---------- */
+
+  .cartao {
+    background: var(--cartao); border: 1px solid var(--linha);
+    border-radius: var(--raio-g); box-shadow: var(--sombra);
+    padding: 26px 22px;
+  }
+
+  .barra-topo {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 6px;
+  }
+  .fila { font-size: 12.5px; color: var(--txt-3); }
+  .pontos {
+    font-size: 12.5px; font-weight: 600; color: var(--marca-escura);
+    background: var(--marca-fraca); border: 1px solid var(--marca-borda);
+    padding: 2px 9px; border-radius: 999px; white-space: nowrap;
+  }
+
+  .trilho { height: 3px; background: var(--linha); border-radius: 999px; overflow: hidden; margin-bottom: 26px; }
+  .progresso { height: 100%; width: 0; background: var(--marca); border-radius: 999px; transition: width .3s ease; }
+
+  .rotulo {
+    font-size: 11.5px; letter-spacing: .8px; text-transform: uppercase;
+    color: var(--txt-3); text-align: center; margin: 0 0 6px; font-weight: 600;
+  }
+  .palavra { font-size: 40px; font-weight: 700; text-align: center; margin: 0; letter-spacing: -1.2px; }
+  .classe { font-size: 12.5px; color: var(--txt-3); text-align: center; margin: 2px 0 16px; }
+
+  .frase {
+    font-family: var(--serif); font-style: italic; font-size: 15.5px;
+    color: var(--txt-2); text-align: center; line-height: 1.5;
+    margin: 0 0 26px; padding: 0 8px;
+  }
+
+  /* ---------- lacunas ---------- */
+
+  .lacunas { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+
+  .lacuna {
+    height: 48px; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--raio); font-size: 17px; font-family: inherit;
+    background: var(--fundo); color: var(--txt-3);
+    border: 1px dashed var(--linha-forte); letter-spacing: 2px;
+    cursor: pointer; transition: border-color .15s, background .15s;
+  }
+  .lacuna:hover:not(:disabled) { border-color: var(--marca); background: var(--cartao); }
+  .lacuna:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+  .lacuna:disabled { cursor: default; }
+
+  .lacuna.achada {
+    background: var(--marca-fraca); border: 1px solid var(--marca-borda);
+    color: var(--marca-escura); font-weight: 600; letter-spacing: 0;
+    animation: surgir .22s ease-out;
+  }
+  .lacuna.revelada {
+    background: transparent; border: 1px solid var(--linha);
+    color: var(--txt-3); font-style: italic; letter-spacing: 0;
+  }
+
+  @keyframes surgir {
+    from { transform: scale(.97); opacity: .4; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lacuna.achada { animation: none; }
+    .progresso { transition: none; }
+  }
+
+  .ajuda { font-size: 12px; color: var(--txt-3); text-align: center; margin: 0 0 22px; }
+
+  /* ---------- entrada ---------- */
+
+  .entrada { display: flex; gap: 8px; margin-bottom: 10px; }
+
+  input[type=text] {
+    flex: 1; height: 46px; padding: 0 14px;
+    font-size: 16px; font-family: inherit;
+    background: var(--cartao); color: var(--txt);
+    border: 1px solid var(--linha-forte); border-radius: var(--raio);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input[type=text]::placeholder { color: var(--txt-3); }
+  input[type=text]:focus {
+    outline: none; border-color: var(--marca);
+    box-shadow: 0 0 0 3px var(--marca-fraca);
+  }
+  input[type=text]:disabled { opacity: .5; }
+
+  button {
+    height: 46px; padding: 0 18px;
+    font-size: 14.5px; font-weight: 500; font-family: inherit;
+    background: var(--cartao); color: var(--txt);
+    border: 1px solid var(--linha-forte); border-radius: var(--raio);
+    cursor: pointer; transition: background .15s, border-color .15s, opacity .15s;
+  }
+  button:hover:not(:disabled) { border-color: var(--txt-3); }
+  button:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+  button:active:not(:disabled) { transform: translateY(.5px); }
+  button:disabled { opacity: .4; cursor: default; }
+
+  button.principal {
+    background: var(--marca); border-color: var(--marca); color: #fff; min-width: 92px;
+  }
+  button.principal:hover:not(:disabled) { background: var(--marca-escura); border-color: var(--marca-escura); }
+  @media (prefers-color-scheme: dark) {
+    button.principal { color: #08201b; }
+  }
+
+  .aviso { font-size: 13.5px; text-align: center; min-height: 21px; margin: 0 0 20px; color: var(--txt-3); }
+  .aviso.ok { color: var(--marca-escura); font-weight: 500; }
+  .aviso.erro { color: var(--erro); }
+  .aviso.alerta { color: var(--alerta); }
+
+  .rodape-cartao {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    border-top: 1px solid var(--linha); padding-top: 18px;
+  }
+  .rodape-cartao button { height: 38px; font-size: 13.5px; padding: 0 14px; }
+  .placar { font-size: 14px; color: var(--txt-2); font-variant-numeric: tabular-nums; }
+
+  /* ---------- tela final ---------- */
+
+  .fim { text-align: center; padding: 34px 22px; }
+  .fim-selo {
+    width: 56px; height: 56px; margin: 0 auto 18px; border-radius: 50%;
+    background: var(--marca-fraca); border: 1px solid var(--marca-borda);
+    display: grid; place-items: center; color: var(--marca-escura);
+  }
+  .fim h2 { font-size: 24px; margin: 0 0 8px; letter-spacing: -.5px; }
+  .fim p { color: var(--txt-2); margin: 0 0 24px; font-size: 15px; }
+  .fim p strong { color: var(--txt); }
+
+  /* ---------- rodapé ---------- */
+
+  .rodape {
+    margin-top: 28px; text-align: center;
+    font-size: 12.5px; color: var(--txt-3);
+  }
+  .rodape a { color: var(--txt-2); text-decoration: none; }
+  .rodape a:hover { text-decoration: underline; }
+
+  .oculto { display: none !important; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  @media (max-width: 420px) {
+    h1 { font-size: 25px; }
+    .palavra { font-size: 33px; }
+    .cartao { padding: 22px 16px; }
+    .rodape-cartao button { padding: 0 10px; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <a class="marca" href="https://ferramentas365.com.br/">
+    <span class="marca-icone" aria-hidden="true">F</span>
+    <span class="marca-nome">Ferramentas365</span>
+    <span class="marca-seta" aria-hidden="true">/ jogo de sinônimos</span>
+  </a>
+
+  <span class="pilula">Grátis · sem cadastro · no navegador</span>
+  <h1>Quantos sinônimos você lembra <em>agora</em>?</h1>
+  <p class="subtitulo">Uma palavra por vez, cem no total. Digite, aperte Enter e veja quanto o seu vocabulário aguenta.</p>
+
+  <div id="jogo" class="cartao">
+
+    <div class="barra-topo">
+      <span id="fila" class="fila">carregando…</span>
+      <span id="pontos" class="pontos">0 pontos</span>
+    </div>
+    <div class="trilho"><div id="progresso" class="progresso"></div></div>
+
+    <p class="rotulo">Sinônimos de</p>
+    <p id="palavra" class="palavra">—</p>
+    <p id="classe" class="classe"></p>
+    <p id="frase" class="frase"></p>
+
+    <div id="lacunas" class="lacunas"></div>
+    <p class="ajuda">Clique numa lacuna para pedir dica (−3 pontos)</p>
+
+    <div class="entrada">
+      <label for="campo" class="sr">Digite um sinônimo</label>
+      <input id="campo" type="text" placeholder="Digite um sinônimo"
+             autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button id="btn-enter" type="button" class="principal">Enter</button>
+    </div>
+
+    <p id="aviso" class="aviso" role="status" aria-live="polite">&nbsp;</p>
+
+    <div class="rodape-cartao">
+      <button id="btn-desistir" type="button">Desistir</button>
+      <span id="placar" class="placar">0 de 5</span>
+      <button id="btn-proxima" type="button">Próxima →</button>
+    </div>
+
+  </div>
+
+  <div id="tela-fim" class="cartao fim oculto">
+    <div class="fim-selo" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17l-5-5"></path>
+      </svg>
+    </div>
+    <h2>Parabéns, você zerou o jogo!</h2>
+    <p>Você passou pelas <strong id="fim-total">100</strong> palavras e somou
+       <strong id="fim-pontos">0</strong> pontos.</p>
+    <button id="btn-reiniciar" type="button" class="principal">Jogar de novo</button>
+  </div>
+
+  <p class="rodape">
+    © <span id="ano">2026</span> <a href="https://ferramentas365.com.br/">Ferramentas365</a> · Ferramentas grátis online
+  </p>
+
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const CHAVE = "f365:sinonimos:v1";
+  const BANCO_URL = "./banco-sinonimos.json";
+
+  // Deixe vazio para não enviar nada (modo desenvolvimento).
+  const ENDPOINT_ERRADAS = "";
+
+  const $ = id => document.getElementById(id);
+  const els = {
+    jogo: $("jogo"), telaFim: $("tela-fim"),
+    fila: $("fila"), pontos: $("pontos"), progresso: $("progresso"),
+    palavra: $("palavra"), classe: $("classe"), frase: $("frase"),
+    lacunas: $("lacunas"), campo: $("campo"), aviso: $("aviso"), placar: $("placar"),
+    btnEnter: $("btn-enter"), btnDesistir: $("btn-desistir"), btnProxima: $("btn-proxima"),
+    btnReiniciar: $("btn-reiniciar"), fimTotal: $("fim-total"), fimPontos: $("fim-pontos")
+  };
+
+  $("ano").textContent = new Date().getFullYear();
+
+  // ---------- utilidades ----------
+
+  const normalizar = t => t.toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+
+  // PRNG determinístico: a mesma seed reproduz sempre a mesma ordem.
+  function mulberry32(seed) {
+    return function () {
+      seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function ordemDaSeed(seed, tamanho) {
+    const rand = mulberry32(seed);
+    const a = Array.from({ length: tamanho }, (_, i) => i);
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  const novaSeed = () => (Math.random() * 2 ** 32) >>> 0;
+
+  // ---------- persistência ----------
+
+  const vazio = () => ({ seed: novaSeed(), cursor: 0, pontos: 0, achados: null, dicas: null, fila: [] });
+
+  function carregarEstado(total) {
+    let e;
+    try { e = JSON.parse(localStorage.getItem(CHAVE)); } catch { e = null; }
+    if (!e || typeof e.seed !== "number" || typeof e.cursor !== "number") e = vazio();
+    if (e.cursor > total) e = vazio();
+    if (!Array.isArray(e.fila)) e.fila = [];
+    return e;
+  }
+
+  function salvar() {
+    try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch { /* modo privado, ignora */ }
+  }
+
+  // ---------- registro de tentativas erradas ----------
+
+  function registrarErrada(palavra, tentativa) {
+    estado.fila.push({ palavra, tentativa, em: Date.now() });
+    if (estado.fila.length > 200) estado.fila = estado.fila.slice(-200);
+    salvar();
+    if (estado.fila.length >= 5) enviarErradas();
+  }
+
+  function enviarErradas(usarBeacon) {
+    if (!ENDPOINT_ERRADAS || estado.fila.length === 0) return;
+    const lote = estado.fila.slice();
+    const corpo = JSON.stringify({ tentativas: lote });
+    const limpar = () => { estado.fila = estado.fila.slice(lote.length); salvar(); };
+
+    try {
+      if (usarBeacon && navigator.sendBeacon) {
+        if (navigator.sendBeacon(ENDPOINT_ERRADAS, new Blob([corpo], { type: "application/json" }))) limpar();
+        return;
+      }
+      fetch(ENDPOINT_ERRADAS, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: corpo, keepalive: true
+      }).then(r => { if (r.ok) limpar(); }).catch(() => {});
+    } catch { /* nunca deixa isso quebrar o jogo */ }
+  }
+
+  window.addEventListener("pagehide", () => enviarErradas(true));
+
+  // ---------- estado do jogo ----------
+
+  let BANCO = [], ordem = [], estado = vazio(), atual = null, encerrada = false;
+
+  function iniciarPalavra(retomando) {
+    atual = BANCO[ordem[estado.cursor]];
+    const n = atual.sinonimos.length;
+
+    if (!retomando || !Array.isArray(estado.achados) || estado.achados.length !== n) {
+      estado.achados = new Array(n).fill(null);
+      estado.dicas = new Array(n).fill(0);
+    }
+
+    encerrada = estado.achados.every(Boolean);
+
+    els.palavra.textContent = atual.palavra;
+    els.classe.textContent = atual.classe;
+    els.frase.textContent = "\u201C" + atual.frase + "\u201D";
+    els.fila.textContent = `palavra ${estado.cursor + 1} de ${BANCO.length}`;
+    els.progresso.style.width = ((estado.cursor + 1) / BANCO.length * 100) + "%";
+    els.campo.value = "";
+
+    avisar("", "");
+    travar(encerrada);
+    desenhar();
+    if (!encerrada) els.campo.focus();
+    salvar();
+  }
+
+  function textoDica(i) {
+    const w = atual.sinonimos[i], n = estado.dicas[i];
+    if (n === 1) return w[0] + "…";
+    if (n === 2) return w[0] + " " + "_ ".repeat(w.length - 1).trim();
+    if (n >= 3) return w[0] + " " + w[1] + " " + "_ ".repeat(w.length - 2).trim();
+    return "";
+  }
+
+  function desenhar() {
+    els.lacunas.innerHTML = "";
+
+    atual.sinonimos.forEach((w, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "lacuna";
+      const achado = estado.achados[i];
+
+      if (achado === "revelado") {
+        b.classList.add("revelada");
+        b.textContent = w;
+        b.disabled = true;
+        b.setAttribute("aria-label", `Sinônimo revelado: ${w}`);
+      } else if (achado) {
+        b.classList.add("achada");
+        b.textContent = w;
+        b.disabled = true;
+        b.setAttribute("aria-label", `Acertou: ${w}`);
+      } else {
+        b.textContent = textoDica(i);
+        b.disabled = encerrada;
+        b.setAttribute("aria-label", `Lacuna ${i + 1}. Clique para pedir dica.`);
+        b.addEventListener("click", () => pedirDica(i));
+      }
+      els.lacunas.appendChild(b);
+    });
+
+    const achados = estado.achados.filter(Boolean).length;
+    els.placar.textContent = `${achados} de ${atual.sinonimos.length}`;
+    els.pontos.textContent = `${estado.pontos} ${estado.pontos === 1 ? "ponto" : "pontos"}`;
+  }
+
+  function travar(v) {
+    els.campo.disabled = v;
+    els.btnEnter.disabled = v;
+    els.btnDesistir.disabled = v;
+  }
+
+  function avisar(txt, classe) {
+    els.aviso.textContent = txt || "\u00A0";
+    els.aviso.className = "aviso" + (classe ? " " + classe : "");
+  }
+
+  function pedirDica(i) {
+    if (encerrada || estado.achados[i]) return;
+    if (estado.dicas[i] >= 3) { avisar("Sem mais dicas para essa lacuna.", "alerta"); return; }
+    estado.dicas[i]++;
+    estado.pontos = Math.max(0, estado.pontos - 3);
+    desenhar();
+    salvar();
+    els.campo.focus();
+  }
+
+  function tentar() {
+    const v = normalizar(els.campo.value);
+    if (!v) return;
+    els.campo.value = "";
+
+    if (v === normalizar(atual.palavra)) { avisar("Essa é a própria palavra.", "alerta"); return; }
+
+    const i = atual.sinonimos.findIndex(s => normalizar(s) === v);
+
+    if (i === -1) {
+      avisar("Não é esse. Tente outro.", "erro");
+      registrarErrada(atual.palavra, v);
+      return;
+    }
+    if (estado.achados[i]) { avisar("Você já encontrou essa.", "alerta"); return; }
+
+    estado.achados[i] = atual.sinonimos[i];
+    estado.pontos += Math.max(2, 10 - estado.dicas[i] * 3);
+
+    if (estado.achados.every(Boolean)) {
+      encerrada = true;
+      travar(true);
+      avisar("Todos encontrados. Muito bem.", "ok");
+    } else {
+      avisar("Correto.", "ok");
+    }
+    desenhar();
+    salvar();
+  }
+
+  function desistir() {
+    if (encerrada) return;
+    atual.sinonimos.forEach((w, i) => { if (!estado.achados[i]) estado.achados[i] = "revelado"; });
+    encerrada = true;
+    travar(true);
+    avisar("Palavras reveladas.", "");
+    desenhar();
+    salvar();
+  }
+
+  function proxima() {
+    estado.cursor++;
+    estado.achados = null;
+    estado.dicas = null;
+    if (estado.cursor >= BANCO.length) { zerou(); return; }
+    iniciarPalavra(false);
+  }
+
+  function zerou() {
+    enviarErradas();
+    els.jogo.classList.add("oculto");
+    els.telaFim.classList.remove("oculto");
+    els.fimTotal.textContent = BANCO.length;
+    els.fimPontos.textContent = estado.pontos;
+    salvar();
+  }
+
+  function reiniciar() {
+    const fila = estado.fila;
+    estado = vazio();
+    estado.fila = fila;            // as tentativas pendentes sobrevivem ao reinício
+    ordem = ordemDaSeed(estado.seed, BANCO.length);
+    els.telaFim.classList.add("oculto");
+    els.jogo.classList.remove("oculto");
+    iniciarPalavra(false);
+  }
+
+  // ---------- ligação ----------
+
+  els.btnEnter.addEventListener("click", tentar);
+  els.btnDesistir.addEventListener("click", desistir);
+  els.btnProxima.addEventListener("click", proxima);
+  els.btnReiniciar.addEventListener("click", reiniciar);
+  els.campo.addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); tentar(); }
+  });
+
+  // ---------- boot ----------
+
+  fetch(BANCO_URL)
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(dados => {
+      BANCO = dados.palavras;
+      if (!BANCO.length) throw new Error("banco vazio");
+
+      estado = carregarEstado(BANCO.length);
+      ordem = ordemDaSeed(estado.seed, BANCO.length);
+
+      if (estado.cursor >= BANCO.length) { zerou(); return; }
+      iniciarPalavra(true);
+      enviarErradas();
+    })
+    .catch(() => {
+      els.fila.textContent = "";
+      els.palavra.textContent = "Ops";
+      els.frase.textContent = "Não foi possível carregar o banco de palavras. Recarregue a página.";
+      travar(true);
+      els.btnProxima.disabled = true;
+    });
+})();
+</script>
+</body>
+</html>
