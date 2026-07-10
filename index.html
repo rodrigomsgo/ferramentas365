@@ -265,7 +265,8 @@ const CATEGORIES = {
   conversor:  { label:"Conversores", color:"#2D7FF0", soft:"#E5F0FE" },
   datas:      { label:"Datas",       color:"#D6457A", soft:"#FCE7EF" },
   geradores:  { label:"Geradores",   color:"#16A34A", soft:"#E6F6EC" },
-  mapas:      { label:"Mapas",       color:"#0F7C9E", soft:"#E2F1F7" }
+  mapas:      { label:"Mapas",       color:"#0F7C9E", soft:"#E2F1F7" },
+  jogos:      { label:"Jogos",       color:"#E0523C", soft:"#FCEAE6" }
 };
 
 const TOOLS = [
@@ -275,6 +276,9 @@ const TOOLS = [
     desc:"MAIÚSCULAS, minúsculas, Início Maiúsculo, remover acentos e mais, num clique." },
   { name:"Cartograma",           url:"/cartograma",       cat:"mapas",     icon:"🗺️", status:"live",
     desc:"Pinte os estados do Brasil, marque quantidades e baixe o mapa pronto para seu relatório." },
+  { name:"Jogo de sinônimos",    url:"/sinonimos",        cat:"jogos",     icon:"🔤", status:"live",
+    tags:"palavras vocabulário português quiz jogo",
+    desc:"Uma palavra aparece e você tenta lembrar todos os sinônimos. Cem palavras, sem cadastro." },
 
   { name:"Contador de palavras", url:"#", cat:"texto",     icon:"🔢", status:"soon",
     desc:"Conte palavras, caracteres, linhas e parágrafos de qualquer texto." },
@@ -303,6 +307,8 @@ const emptyTerm = document.getElementById('emptyTerm');
 const qInput = document.getElementById('q');
 let activeCat = 'all';
 
+const semAcento = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 function cardHTML(t){
   const c = CATEGORIES[t.cat] || {label:t.cat,color:"#5C6B66",soft:"#EEF2F1"};
   const style = `--cat:${c.color};--cat-soft:${c.soft}`;
@@ -317,10 +323,11 @@ function cardHTML(t){
 }
 
 function render(){
-  const q = qInput.value.trim().toLowerCase();
+  const qBruto = qInput.value.trim();
+  const q = semAcento(qBruto.toLowerCase());
   const list = TOOLS.filter(t=>{
     const okCat = activeCat==='all' || t.cat===activeCat;
-    const hay = (t.name+' '+t.desc+' '+(CATEGORIES[t.cat]?.label||'')).toLowerCase();
+    const hay = semAcento((t.name+' '+t.desc+' '+(t.tags||'')+' '+(CATEGORIES[t.cat]?.label||'')).toLowerCase());
     const okQ = !q || hay.includes(q);
     return okCat && okQ;
   });
@@ -329,7 +336,7 @@ function render(){
   countEl.innerHTML = q || activeCat!=='all'
     ? `<b>${list.length}</b> ${list.length===1?'ferramenta':'ferramentas'}`
     : `<b>${live}</b> no ar · mais <b>${TOOLS.length-live}</b> a caminho`;
-  if(list.length===0){ emptyEl.classList.add('show'); emptyTerm.textContent = q || CATEGORIES[activeCat]?.label || ''; }
+  if(list.length===0){ emptyEl.classList.add('show'); emptyTerm.textContent = qBruto || CATEGORIES[activeCat]?.label || ''; }
   else emptyEl.classList.remove('show');
 }
 
