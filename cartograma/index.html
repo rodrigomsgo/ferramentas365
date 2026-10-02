@@ -138,7 +138,7 @@
   #map path:hover{filter:brightness(.94)}
   #map.noborder path{stroke:none}
   .nm{font-family:"Segoe UI Semibold","Segoe UI",var(--font);font-weight:600;text-anchor:middle;dominant-baseline:middle;pointer-events:none;
-    paint-order:stroke;stroke-width:1.7px;stroke-linejoin:round}
+    paint-order:stroke;stroke-width:var(--nm-border,1.7px);stroke-linejoin:round}
   .dot{pointer-events:none}
   .mobilebar{display:none}
   @media (max-width:900px){
@@ -266,6 +266,8 @@
           <button class="resetbtn" id="nameBorderReset" title="Voltar ao padrão (preto)">padrão</button>
           <input type="color" id="nameBorderColor" value="#000000">
         </span></div>
+      <div class="opt" style="display:block"><span>Espessura da borda</span>
+        <input type="range" class="slider" id="nameBorderW" min="0" max="5" step="0.1" value="1.7"></div>
     </div>
     <div class="sec">
       <h2>Bolinhas</h2>
@@ -319,6 +321,7 @@ let nameSize = 11;              // tamanho da fonte dos nomes
 let nameColor = "#ffffff";      // cor dos nomes (padrão branco)
 let nameBorderColor = "#000000";// cor da borda (contorno) dos nomes (padrão preto)
 let nameBorderOn = true;        // mostrar/ocultar a borda (contorno) dos nomes
+let nameBorderW = 1.7;          // espessura da borda (contorno) dos nomes
 let borderColor = "#000000";    // cor das bordas dos estados (padrão preto)
 let dotFill = "#FFF200";        // cor de preenchimento das bolinhas (padrão)
 let dotStroke = "#000000";      // cor da borda das bolinhas (padrão preto)
@@ -363,6 +366,25 @@ function gridTop(n, perRow, cx, topY, r){
   }
   return {pos, rows, step};
 }
+/* grade preenchida da DIREITA p/ a esquerda: a 1a bolinha fica em rx (junto à costa) */
+function gridRight(n, perRow, rx, topY, r){
+  const gap = 2, step = r*2+gap, pos=[];
+  const rows=Math.ceil(n/perRow);
+  for(let row=0; row<rows; row++){
+    const inRow=Math.min(perRow, n-row*perRow);
+    for(let c=0;c<inRow;c++) pos.push([rx-c*step, topY+row*step]);
+  }
+  return pos;
+}
+/* estados do NE: 1a bolinha sempre no MESMO ponto (direita/costa, altura fixa = a de 3 bolinhas);
+   novas bolinhas só enchem p/ a esquerda e descem. rx = x da bolinha mais à direita; ty = y da 1a linha. */
+const RIGHTCFG = {
+  RN:{rx:719, ty:223},
+  PB:{rx:723, ty:242},
+  PE:{rx:722, ty:266},
+  AL:{rx:713, ty:290},
+  SE:{rx:690, ty:309}
+};
 /* testa se o círculo (centro + 4 extremos) está inteiro dentro do estado */
 function mkPt(x,y){ try{ return new DOMPoint(x,y); }catch(e){ const p=svg.createSVGPoint(); p.x=x; p.y=y; return p; } }
 function dotsFit(sig, pos, r){
@@ -380,24 +402,32 @@ function layoutDots(sig, n, ax, ay, r, showLabel){
   const key=sig+'|'+n+'|'+r+'|'+(showLabel?1:0)+'|'+nameSize;
   if(_fitCache[key]) return _fitCache[key];
   const base=Math.max(1, Math.ceil(Math.sqrt(n)));
+  const forced = DOTPERROW[sig];                 // nº fixo de bolinhas por linha, se definido
+  // NE: começa sempre no mesmo ponto fixo (direita/costa, altura de 3 bolinhas); enche p/ a esquerda e desce
+  const rc = RIGHTCFG[sig];
+  if(rc && forced){
+    const perRow=Math.min(forced,n);
+    const resR={pos:gridRight(n, perRow, rc.rx, rc.ty, r), r};
+    _fitCache[key]=resR; return resR;
+  }
+  const pr0 = forced ? Math.min(forced,n) : Math.max(1,base-1);
+  const pr1 = forced ? Math.min(forced,n) : Math.min(n,base+3);
   const cands=[];
-  for(let perRow=Math.max(1,base-1); perRow<=Math.min(n,base+3); perRow++)
+  for(let perRow=pr0; perRow<=pr1; perRow++)
     for(let dy=0; dy<=36; dy+=3)
       for(let dx=-45; dx<=45; dx+=3)
         cands.push([Math.abs(dx)+dy*1.2+Math.abs(perRow-base)*8, perRow, dx, dy]);
   cands.sort((a,b)=>a[0]-b[0]);
   let budget=6000, res=null;
-  for(let rr=r; rr>=3 && budget>0; rr--){
-    for(const c of cands){
-      if(--budget<=0) break;
-      const perRow=c[1], dx=c[2], dy=c[3];
-      const g=gridTop(n, perRow, ax+dx, topFor(ay,rr,showLabel,n,perRow)+dy, rr);
-      if(dotsFit(sig, g.pos, rr)){ res={pos:g.pos, r:rr}; break; }
-    }
-    if(res) break;
+  // mantém SEMPRE o raio escolhido pelo usuário; busca só a melhor posição/arranjo que caiba
+  for(const c of cands){
+    if(--budget<=0) break;
+    const perRow=c[1], dx=c[2], dy=c[3];
+    const g=gridTop(n, perRow, ax+dx, topFor(ay,r,showLabel,n,perRow)+dy, r);
+    if(dotsFit(sig, g.pos, r)){ res={pos:g.pos, r}; break; }
   }
-  if(!res){   // não coube (estados minúsculos, ex. DF): mantém o arranjo simples
-    const g=gridTop(n, base, ax, topFor(ay,r,showLabel,n,base), r);
+  if(!res){   // não coube em lugar nenhum: usa o arranjo pedido, ainda no tamanho do usuário
+    const g=gridTop(n, forced?Math.min(forced,n):base, ax, topFor(ay,r,showLabel,n,forced?Math.min(forced,n):base), r);
     res={pos:g.pos, r};
   }
   _fitCache[key]=res;
@@ -412,8 +442,19 @@ function lum(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),
 function textColor(fill){return lum(fill)<0.58 ? "#ffffff" : "#3a3630";}
 
 /* Ajuste de posição do nome (enclaves e estados onde o nome estorva as bolinhas) */
-const OFFSET = { DF:{dx:0, dy:-16, leader:false}, BA:{dx:0, dy:-30, leader:false}, RS:{dx:0, dy:-28, leader:false}, SC:{dx:0, dy:-16, leader:false}, SP:{dx:11, dy:-30, leader:false} };
+const OFFSET = { DF:{dx:0, dy:-18, leader:false, always:true}, BA:{dx:0, dy:-30, leader:false}, RS:{dx:0, dy:-28, leader:false}, SC:{dx:0, dy:-16, leader:false}, SP:{dx:11, dy:-30, leader:false} };
 
+/* Rótulo externo (nome/sigla puxado para fora, à direita, perto da costa) p/ os estados
+   pequenos e apertados do leste do NE. lx = onde o texto começa; ly = altura do texto. */
+const EXTLABEL = {
+  RN:{lx:736, ly:214},
+  PB:{lx:739, ly:248},
+  PE:{lx:748, ly:274},
+  AL:{lx:733, ly:296},
+  SE:{lx:710, ly:320}
+};
+/* Máximo de bolinhas por linha (primeira linha) para estados específicos do NE */
+const DOTPERROW = { RN:4, PB:5, PE:8, AL:4, SE:4 };
 /* ---------- render dots + labels ---------- */
 function renderState(sig){
   // remove old
@@ -424,11 +465,16 @@ function renderState(sig){
   const tcol = nameColor;
   const halo = nameBorderColor;
   const off = OFFSET[sig];
-  const ax = s.cx + (off?off.dx:0);
-  const ay = s.cy + (off?off.dy:0);   // ANCHOR: nome fica sempre aqui, não se move
+  const ext = EXTLABEL[sig];
+  // rótulo externo: no modo "Nome" sempre; no modo "Sigla" só quando há bolinhas (senão a sigla cabe no centro)
+  const extOut = !!ext && ( labelMode==='name' || (labelMode==='sigla' && data.dots>0) );
+  // o deslocamento do nome (OFFSET) vale quando há bolinhas; DF (always) vale sempre
+  const useOff = off && (data.dots>0 || off.always);
+  const ax = s.cx + (useOff?off.dx:0);
+  const ay = s.cy + (useOff?off.dy:0);   // ANCHOR do nome
   const showLabel = labelMode!=='none';
   if(data.dots>0){
-    const {pos, r:rr} = layoutDots(sig, data.dots, ax, ay, dotR, showLabel);
+    const {pos, r:rr} = layoutDots(sig, data.dots, ax, ay, dotR, extOut?false:showLabel);
     pos.forEach(([px,py])=>{
       const c=mk('circle');
       c.setAttribute('cx',px.toFixed(1)); c.setAttribute('cy',py.toFixed(1));
@@ -437,6 +483,17 @@ function renderState(sig){
       c.dataset.s=sig; c.setAttribute('class','dot');
       gDots.appendChild(c);
     });
+  }
+  if(extOut){
+    // nome/sigla puxado para fora (perto da costa), alinhado à esquerda, SEM linha-guia
+    const t=mk('text');
+    t.setAttribute('x',ext.lx); t.setAttribute('y',ext.ly);
+    t.setAttribute('class','nm'); t.style.textAnchor='start';
+    t.setAttribute('fill',tcol); t.setAttribute('stroke', nameBorderOn ? halo : 'none');
+    t.setAttribute('font-size', nameSize);
+    t.dataset.s=sig; t.textContent = labelMode==='sigla'? s.sigla : s.name;
+    gLabels.appendChild(t);
+    return;
   }
   // leader line connecting the real location to the moved label (only when pushed far)
   if(off && off.leader!==false && (showLabel || data.dots>0)){
@@ -598,6 +655,8 @@ const nameBColorEl=document.getElementById('nameBorderColor');
 nameBColorEl.addEventListener('input',e=>{ nameBorderColor=e.target.value; renderAll(); });
 document.getElementById('nameBorderReset').onclick=()=>{ nameBColorEl.value='#000000'; nameBorderColor='#000000'; renderAll(); };
 document.getElementById('tglNameBorder').addEventListener('change',e=>{ nameBorderOn=e.target.checked; renderAll(); });
+document.getElementById('nameBorderW').addEventListener('input',e=>{ nameBorderW=+e.target.value; svg.style.setProperty('--nm-border', nameBorderW+'px'); });
+svg.style.setProperty('--nm-border', nameBorderW+'px');
 /* bordas dos estados (padrão = preto) */
 document.getElementById('tglBorders').addEventListener('change',e=>svg.classList.toggle('noborder',!e.target.checked));
 const borderColorEl=document.getElementById('borderColor');
@@ -668,10 +727,25 @@ function buildCanvas(cb){
   const totalDots=Object.values(st).reduce((a,d)=>a+d.dots,0);
   const legRows = legendColors.length + (totalDots?1:0);
   const mapW=DATA.W*scale, mapH=DATA.H*scale;
+  // rótulos externos (NE, à direita) podem estourar o viewBox; calcula o espaço extra à direita
+  let extraR=0;
+  for(const sig in EXTLABEL){
+    const dd=st[sig]; if(!dd) continue;
+    const outName = labelMode==='name';
+    const outSigla = labelMode==='sigla' && dd.dots>0;
+    if((outName||outSigla) && (dd.color || dd.dots)){
+      const txt = outSigla ? sig : meta[sig].name;
+      const need = EXTLABEL[sig].lx + (txt.length*nameSize*0.62) - DATA.W;
+      if(need>extraR) extraR=need;
+    }
+  }
+  extraR=Math.ceil(extraR)+6;
+  const vbW = DATA.W + Math.max(0, extraR);
+  const extraPx = Math.max(0, extraR)*scale;   // largura extra no canvas, na mesma escala do mapa
   const titleH = title?52*scale:14*scale;
   const legRowH=36*scale;
   const legH = legRows? legRows*legRowH+18*scale : 0;
-  const cW=mapW+pad*2, cH=titleH+mapH+legH+pad;
+  const cW=mapW+extraPx+pad*2, cH=titleH+mapH+legH+pad;
   const canvas=document.createElement('canvas'); canvas.width=cW; canvas.height=cH;
   const ctx=canvas.getContext('2d');
   ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,cW,cH);
@@ -680,23 +754,23 @@ function buildCanvas(cb){
   const clone=svg.cloneNode(true);
   const vp=clone.querySelector('#viewport'); if(vp) vp.removeAttribute('transform');   // exporta sempre o mapa inteiro
   // sem width/height explícitos o navegador rasteriza o SVG no tamanho pequeno e depois amplia (imagem borrada)
-  clone.setAttribute('width', mapW);
+  clone.setAttribute('width', mapW+extraPx);
   clone.setAttribute('height', mapH);
-  clone.setAttribute('viewBox', '0 0 '+DATA.W+' '+DATA.H);
-  clone.setAttribute('preserveAspectRatio','xMidYMid meet');
+  clone.setAttribute('viewBox', '0 0 '+vbW+' '+DATA.H);
+  clone.setAttribute('preserveAspectRatio','xMinYMid meet');
   clone.querySelectorAll('path').forEach(p=>{
     p.setAttribute('stroke', svg.classList.contains('noborder')?'none':borderColor);
     p.setAttribute('stroke-width','0.85');
   });
   const style=document.createElementNS(svgNS,'style');
   style.textContent='.nm{font-family:"Segoe UI Semibold","Segoe UI",'+getFont()+';font-weight:600;text-anchor:middle;'
-    +'dominant-baseline:middle;paint-order:stroke;stroke-width:1.7px;stroke-linejoin:round}';
+    +'dominant-baseline:middle;paint-order:stroke;stroke-width:'+nameBorderW+'px;stroke-linejoin:round}';
   clone.insertBefore(style, clone.firstChild);
   const str=new XMLSerializer().serializeToString(clone);
   const img=new Image();
   const url=URL.createObjectURL(new Blob([str],{type:'image/svg+xml;charset=utf-8'}));
   img.onload=()=>{
-    ctx.drawImage(img,pad,titleH,mapW,mapH);
+    ctx.drawImage(img,pad,titleH,mapW+extraPx,mapH);
     URL.revokeObjectURL(url);
     let ly=titleH+mapH+8*scale;
     ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.font=`600 ${15*scale}px ${getFont()}`;
