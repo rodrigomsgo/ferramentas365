@@ -217,7 +217,7 @@
     </div>
     <div class="sec">
       <h2>Exportar imagem</h2>
-      <p class="hint">Baixe o mapa pronto (título e legenda incluídos).</p>
+      <p class="hint">Baixe o mapa pronto para o relatório.</p>
       <div class="opt"><span>Resolução</span>
         <select id="exportScale" class="sel">
           <option value="2">2× (rápido)</option>
@@ -225,6 +225,10 @@
           <option value="4">4× (alta)</option>
           <option value="6">6× (máxima)</option>
         </select></div>
+      <div class="opt"><span>Incluir título</span>
+        <label class="toggle"><input type="checkbox" id="expTitle" checked><span class="track"></span></label></div>
+      <div class="opt"><span>Incluir legenda</span>
+        <label class="toggle"><input type="checkbox" id="expLegend" checked><span class="track"></span></label></div>
       <div class="exportbtns">
         <button class="btn primary" id="dlPNG">PNG</button>
         <button class="btn" id="dlJPEG">JPEG</button>
@@ -442,19 +446,24 @@ function lum(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),
 function textColor(fill){return lum(fill)<0.58 ? "#ffffff" : "#3a3630";}
 
 /* Ajuste de posição do nome (enclaves e estados onde o nome estorva as bolinhas) */
-const OFFSET = { DF:{dx:0, dy:-18, leader:false, always:true}, BA:{dx:0, dy:-30, leader:false}, RS:{dx:0, dy:-28, leader:false}, SC:{dx:0, dy:-16, leader:false}, SP:{dx:11, dy:-30, leader:false} };
+const OFFSET = { DF:{dx:0, dy:-18, leader:false, always:true}, BA:{dx:0, dy:-30, leader:false, always:true}, SC:{dx:0, dy:-16, leader:false}, SP:{dx:11, dy:-30, leader:false} };
 
-/* Rótulo externo (nome/sigla puxado para fora, à direita, perto da costa) p/ os estados
-   pequenos e apertados do leste do NE. lx = onde o texto começa; ly = altura do texto. */
+/* Rótulo externo (nome/sigla puxado para fora, à direita, perto da costa).
+   lx = onde o texto começa; ly = altura do texto. Vale com ou sem bolinhas, em nome e sigla. */
 const EXTLABEL = {
   RN:{lx:736, ly:214},
   PB:{lx:739, ly:248},
   PE:{lx:748, ly:274},
   AL:{lx:733, ly:296},
-  SE:{lx:710, ly:320}
+  SE:{lx:710, ly:320},
+  ES:{lx:652, ly:462},
+  RJ:{lx:650, ly:524}
 };
 /* Máximo de bolinhas por linha (primeira linha) para estados específicos do NE */
 const DOTPERROW = { RN:4, PB:5, PE:8, AL:4, SE:4 };
+/* Estados em que o nome/sigla SOBE conforme mais bolinhas são adicionadas
+   (bolinhas centradas no estado; o nome fica logo acima da linha de cima) */
+const RISE = { PR:1, RS:1, MS:1, PI:1, MA:1, CE:1 };
 /* ---------- render dots + labels ---------- */
 function renderState(sig){
   // remove old
@@ -466,15 +475,18 @@ function renderState(sig){
   const halo = nameBorderColor;
   const off = OFFSET[sig];
   const ext = EXTLABEL[sig];
-  // rótulo externo: no modo "Nome" sempre; no modo "Sigla" só quando há bolinhas (senão a sigla cabe no centro)
-  const extOut = !!ext && ( labelMode==='name' || (labelMode==='sigla' && data.dots>0) );
-  // o deslocamento do nome (OFFSET) vale quando há bolinhas; DF (always) vale sempre
+  const showLabel = labelMode!=='none';
+  const extOut = !!ext && showLabel;            // rótulo externo sempre (nome e sigla, com ou sem bolinhas)
+  const rise = !!RISE[sig] && showLabel;        // nome sobe conforme mais bolinhas
+  // o deslocamento do nome (OFFSET) vale quando há bolinhas; DF/BA (always) valem sempre
   const useOff = off && (data.dots>0 || off.always);
   const ax = s.cx + (useOff?off.dx:0);
   const ay = s.cy + (useOff?off.dy:0);   // ANCHOR do nome
-  const showLabel = labelMode!=='none';
+  // bolinhas reservam espaço p/ o nome só no layout "nome fixo em cima" (não em externo, não em rise)
+  const reserve = showLabel && !extOut && !rise;
+  let dotTopY = null;
   if(data.dots>0){
-    const {pos, r:rr} = layoutDots(sig, data.dots, ax, ay, dotR, extOut?false:showLabel);
+    const {pos, r:rr} = layoutDots(sig, data.dots, ax, ay, dotR, reserve);
     pos.forEach(([px,py])=>{
       const c=mk('circle');
       c.setAttribute('cx',px.toFixed(1)); c.setAttribute('cy',py.toFixed(1));
@@ -483,12 +495,24 @@ function renderState(sig){
       c.dataset.s=sig; c.setAttribute('class','dot');
       gDots.appendChild(c);
     });
+    dotTopY = Math.min.apply(null, pos.map(p=>p[1])) - rr;
   }
   if(extOut){
     // nome/sigla puxado para fora (perto da costa), alinhado à esquerda, SEM linha-guia
     const t=mk('text');
     t.setAttribute('x',ext.lx); t.setAttribute('y',ext.ly);
     t.setAttribute('class','nm'); t.style.textAnchor='start';
+    t.setAttribute('fill',tcol); t.setAttribute('stroke', nameBorderOn ? halo : 'none');
+    t.setAttribute('font-size', nameSize);
+    t.dataset.s=sig; t.textContent = labelMode==='sigla'? s.sigla : s.name;
+    gLabels.appendChild(t);
+    return;
+  }
+  if(rise && data.dots>0){
+    // nome logo acima da linha de cima das bolinhas (sobe conforme a quantidade cresce)
+    const t=mk('text');
+    t.setAttribute('x', ax); t.setAttribute('y', dotTopY - Math.round(nameSize*0.5) - 3);
+    t.setAttribute('class','nm');
     t.setAttribute('fill',tcol); t.setAttribute('stroke', nameBorderOn ? halo : 'none');
     t.setAttribute('font-size', nameSize);
     t.dataset.s=sig; t.textContent = labelMode==='sigla'? s.sigla : s.name;
@@ -720,12 +744,14 @@ function saveBlob(blob, name){ const a=document.createElement('a'); a.href=URL.c
 function buildCanvas(cb){
   const scale=+(document.getElementById('exportScale')||{value:3}).value || 3;
   const pad=44*scale;
-  const title=document.getElementById('mapTitle').value.trim();
+  const wantTitle = !document.getElementById('expTitle') || document.getElementById('expTitle').checked;
+  const wantLegend = !document.getElementById('expLegend') || document.getElementById('expLegend').checked;
+  const title = wantTitle ? document.getElementById('mapTitle').value.trim() : '';
   const used={};
   Object.entries(st).forEach(([sig,d])=>{ if(d.color) used[d.color]=true; });
-  const legendColors=Object.keys(used);
+  const legendColors = wantLegend ? Object.keys(used) : [];
   const totalDots=Object.values(st).reduce((a,d)=>a+d.dots,0);
-  const legRows = legendColors.length + (totalDots?1:0);
+  const legRows = legendColors.length + (wantLegend && totalDots?1:0);
   const mapW=DATA.W*scale, mapH=DATA.H*scale;
   // rótulos externos (NE, à direita) podem estourar o viewBox; calcula o espaço extra à direita
   let extraR=0;
@@ -780,7 +806,7 @@ function buildCanvas(cb){
       ctx.fillStyle='#20293a'; ctx.fillText(legendLabels[col]||'(sem nome)', pad+32*scale, ly+11*scale);
       ly+=legRowH;
     });
-    if(totalDots){
+    if(wantLegend && totalDots){
       ctx.fillStyle=dotFill; ctx.beginPath(); ctx.arc(pad+11*scale,ly+11*scale,10*scale,0,7); ctx.fill();
       ctx.strokeStyle=dotStroke; ctx.lineWidth=1.5*scale; ctx.stroke();
       ctx.fillStyle='#20293a'; ctx.fillText(dotLabel||'cada bolinha = 1 unidade', pad+32*scale, ly+11*scale);
