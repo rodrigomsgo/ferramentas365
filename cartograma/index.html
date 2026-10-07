@@ -190,6 +190,8 @@
       <div class="tools">
         <div class="tool active" data-tool="paint"><span class="ic">🖌️</span>Pintar</div>
         <div class="tool" data-tool="dots"><span class="ic">🟡</span>Bolinhas</div>
+        <div class="tool" data-action="paintall"><span class="ic">🎨</span>Pintar tudo</div>
+        <div class="tool" data-action="unpaintall"><span class="ic">🧽</span>Despintar tudo</div>
         <div class="tool danger" data-action="reset"><span class="ic">🗑️</span>Limpar tudo</div>
       </div>
       <p class="hint" id="toolHint">Escolha uma cor e clique nos estados para pintar.</p>
@@ -587,6 +589,18 @@ document.querySelectorAll('.tool[data-tool]').forEach(el=>{
   };
 });
 document.querySelector('.tool[data-action="reset"]').onclick=resetAll;
+/* Pintar tudo: pinta todos os estados com a cor atual (mantém as bolinhas) */
+function paintAll(){
+  DATA.states.forEach(s=>{ st[s.sigla].color=activeColor; paths[s.sigla].setAttribute('fill',activeColor); renderState(s.sigla); });
+  renderLegend();
+}
+/* Despintar tudo: remove só as cores de todos os estados, MANTENDO as bolinhas */
+function unpaintAll(){
+  DATA.states.forEach(s=>{ st[s.sigla].color=null; paths[s.sigla].setAttribute('fill',DEFAULT_FILL); renderState(s.sigla); });
+  renderLegend();
+}
+document.querySelector('.tool[data-action="paintall"]').onclick=paintAll;
+document.querySelector('.tool[data-action="unpaintall"]').onclick=unpaintAll;
 
 /* ---------- palette ---------- */
 const swWrap=document.getElementById('swatches');
